@@ -102,6 +102,8 @@ pub struct Config {
     pub generate_sitemap: bool,
     /// Enables the generation of robots.txt
     pub generate_robots_txt: bool,
+    /// A list of extra paths to watch for changes
+    pub extra_watch_paths: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -123,6 +125,7 @@ pub struct SerializedConfig<'a> {
     search: search::SerializedSearch<'a>,
     generate_sitemap: bool,
     generate_robots_txt: bool,
+    extra_watch_paths: &'a [String],
 }
 
 impl Config {
@@ -340,6 +343,7 @@ impl Config {
             search: self.search.serialize(),
             generate_sitemap: self.generate_sitemap,
             generate_robots_txt: self.generate_robots_txt,
+            extra_watch_paths: &self.extra_watch_paths,
         }
     }
 }
@@ -405,6 +409,7 @@ impl Default for Config {
             extra: HashMap::new(),
             generate_sitemap: true,
             generate_robots_txt: true,
+            extra_watch_paths: Vec::new(),
         }
     }
 }
@@ -802,6 +807,19 @@ ignored_files = ["*.{graphml,iso}", "*.py?", "**/{target,temp_folder}"]
         assert!(g.is_match("temp_folder"));
         assert!(g.is_match("my/isos/foo.iso"));
         assert!(g.is_match("content/poetry/zen.py2"));
+    }
+
+    #[test]
+    fn non_empty_extra_watch_paths_results_in_vector_of_extra_watch_paths() {
+        let config_str = r#"
+title = "My site"
+base_url = "example.com"
+extra_watch_paths = ["a", "b"]
+        "#;
+
+        let config = Config::parse(config_str).unwrap();
+        let v = config.extra_watch_paths;
+        assert_eq!(v, vec!["a", "b"]);
     }
 
     #[test]

@@ -12,6 +12,7 @@ If you are not familiar with TOML, have a look at [the TOML spec](https://github
 ⚠️ If you add keys to your `config.toml`, you must pay attention to which TOML section it belongs to. A TOML section starts with a header, e.g. `[search]`, and ends at the next section or EOF.
 
 Here are the current `config.toml` sections:
+
 1. main (unnamed)
 2. markdown
 3. link_checker
@@ -105,6 +106,9 @@ generate_sitemap = true
 
 # When set to "false", robots.txt is not generated
 generate_robots_txt = true
+
+# Extra paths to watch for changes, relative to config.toml
+extra_watch_paths = []
 
 # Configuration of the Markdown rendering
 [markdown]

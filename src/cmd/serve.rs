@@ -462,7 +462,7 @@ pub fn serve(
     // An array of (path, WatchMode, RecursiveMode) where the path is watched for changes,
     // the WatchMode value indicates whether this path must exist for zola serve to operate,
     // and the RecursiveMode value indicates whether to watch nested directories.
-    let watch_this = vec![
+    let mut watch_this = vec![
         // The first entry is ultimtely to watch config.toml in a more robust manner on Linux when
         // the file changes by way of a caching strategy used by editors such as vim.
         // https://github.com/getzola/zola/issues/2266
@@ -473,6 +473,12 @@ pub fn serve(
         ("templates", WatchMode::Optional, RecursiveMode::Recursive),
         ("themes", WatchMode::Condition(site.config.theme.is_some()), RecursiveMode::Recursive),
     ];
+    watch_this.extend(
+        site.config
+            .extra_watch_paths
+            .iter()
+            .map(|path| (path.as_str(), WatchMode::Required, RecursiveMode::Recursive)),
+    );
 
     // Setup watchers
     let (tx, rx) = channel();
@@ -806,6 +812,12 @@ pub fn serve(
                             // No need to iterate over change group since we're rebuilding the site.
                             console::info("-> Config changed. The browser needs to be refreshed to make the changes visible.");
 
+                            if let Some(s) = recreate_site() {
+                                site = s;
+                            }
+                        }
+                        ChangeKind::Unknown => {
+                            // Probably a user-defined watch location. We can't know exactly what to update.
                             if let Some(s) = recreate_site() {
                                 site = s;
                             }
